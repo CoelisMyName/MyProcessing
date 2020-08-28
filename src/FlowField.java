@@ -1,7 +1,8 @@
 import processing.core.PApplet;
 import processing.core.PVector;
-
+@SuppressWarnings("unchecked")
 public class FlowField extends PApplet {
+
     public static void main (String... args) {
         FlowField pt = new FlowField();
         PApplet.runSketch(new String[]{"FlowField"}, pt);
