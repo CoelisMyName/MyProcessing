@@ -1,6 +1,6 @@
-var scl = 20;
+const scl = 20;
 
-var fieldStrength = 0.3;
+const fieldStrength = 0.3;
 
 var zoffInc = 0.01;
 
@@ -17,11 +17,14 @@ var particles = [];
 var h = 0;
 var colUp = true;
 
-var maxSpeed = 4;
+const maxSpeed = 4;
+
+const num = 10000;
+
+var mm = 0;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    //createCanvas(500, 500);
     cols = width/scl;
     rows = height/scl;
     background(0);
@@ -30,13 +33,6 @@ function setup() {
 }
 
 function draw() {
-    //loadPixels();
-    //for(var i = 0; i < pixels.length; ++i){
-        //var rgb = pixels[i];
-        //var temp = brightness(rgb) * decline;
-        //pixels[i] = color(hue(rgb),saturation(rgb),temp);
-    //}
-    //updatePixels();
     background(0,0,0,15);
 
     var yoff = 0;
@@ -65,7 +61,6 @@ function draw() {
         particle.display();
     }
 
-
     if (colUp) {
         h++;
     } else {
@@ -82,11 +77,11 @@ function draw() {
 }
 
 function mouseClicked() {
-    if (mouseX < width / 2) {
-        background(0);
-    }else{
-        refresh();
+    var temp = num / 100;
+    for(var i = mm; i < num; i += temp){
+        particles[i].updateloc(mouseX,mouseY);
     }
+    mm = (mm + 1) % temp;
 }
 
 function refresh() {
@@ -106,6 +101,16 @@ function Particle(){
     this.acc = createVector(0, 0);
     this.oldpos = createVector(this.pos.x, this.pos.y);
     this.col = color(random(255), 255, 255);
+
+    this.updateloc = function(x,y) {
+        this.pos.x = x;
+        this.pos.y = y;
+        this.updateOldPos()
+        var temp = random(0,TWO_PI);
+        this.vel.x = maxSpeed * cos(temp);
+        this.vel.y = maxSpeed * sin(temp);
+        this.acc.mult(0);
+    }
 
     this.follow = function(vets) {
         var x = floor(this.pos.x/scl);
@@ -167,5 +172,4 @@ function Particle(){
             this.updateOldPos();
         }
     }
-
 }
