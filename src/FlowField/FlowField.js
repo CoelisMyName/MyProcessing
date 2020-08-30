@@ -9,8 +9,6 @@ var angleMult = 2;
 var zoff = 0;
 var noiseInc = 0.1;
 
-var decline = 0.9999;
-
 var rows, cols;
 
 var flowfield = [];
