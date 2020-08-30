@@ -1,3 +1,5 @@
+package FlowField;
+
 import processing.core.PApplet;
 import processing.core.PVector;
 @SuppressWarnings("unchecked")
@@ -29,19 +31,16 @@ public class FlowField extends PApplet {
     float h = 0;
     boolean colUp = true;
 
+    float maxSpeed = 4;
+
     @Override
     public void settings() {
         size(1920, 1080, P2D);
         fullScreen(P2D);
-
         cols = width/scl;
         rows = height/scl;
-
         flowfield = new PVector[rows*cols];
-
         createParticles();
-
-
     }
 
     @Override
@@ -52,14 +51,17 @@ public class FlowField extends PApplet {
 
     @Override
     public void draw() {
-            loadPixels();
+            /*loadPixels();
             for(int i = 0; i < pixels.length; ++i){
                 int rgb = pixels[i];
                 int temp = (int) (brightness(rgb) * decline);
                 pixels[i] = color(hue(rgb),saturation(rgb),temp);
 
             }
-            updatePixels();
+            updatePixels();*/
+        noStroke();
+        fill(0,15);
+        rect(0,0,width,height);
 
 
         float yoff = 0;
@@ -80,12 +82,12 @@ public class FlowField extends PApplet {
         }
         zoff += zoffInc;
 
-        for (int i = 0; i < particles.length; i++) {
-            particles[i].updateColor(color(h, 255, 255));
-            particles[i].edges();
-            particles[i].follow(flowfield);
-            particles[i].update();
-            particles[i].display();
+        for (Particle particle : particles) {
+            particle.updateColor(color(h, 255, 255));
+            particle.edges();
+            particle.follow(flowfield);
+            particle.update();
+            particle.display();
         }
 
 
@@ -132,8 +134,6 @@ public class FlowField extends PApplet {
 
         private PVector oldpos;
 
-        private float maxSpeed;
-
         private int col;
 
 
@@ -141,11 +141,7 @@ public class FlowField extends PApplet {
             pos = new PVector(random(width-1), random(height-1));
             vel = new PVector(0, 0);
             acc = new PVector(0, 0);
-
             oldpos = new PVector(pos.x, pos.y);
-
-            maxSpeed = 4;
-
             col = color(random(255), 255, 255);
         }
 
@@ -169,7 +165,6 @@ public class FlowField extends PApplet {
             stroke(col, 5);
             strokeWeight(1);
             line(pos.x, pos.y, oldpos.x, oldpos.y);
-
             updateOldPos();
         }
 
