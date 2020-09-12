@@ -15,8 +15,8 @@ public class Audio extends PApplet {
         PApplet.runSketch(new String[]{"Audio"}, pt);
     }
 
-    public static final String apcm = "D:\\测试信号.pcm";
-    public static final String bpcm = "D:\\卷积逆信号.pcm";
+    public static final String apcm = "C:\\Users\\onthe\\Desktop\\物院app\\测试信号.pcm";
+    public static final String bpcm = "C:\\Users\\onthe\\Desktop\\物院app\\卷积逆信号.pcm";
 
     long aLong = 0;
     long bLong = 0;
@@ -42,7 +42,7 @@ public class Audio extends PApplet {
         abline = (height / 3) / 2;
         bbline = abline + height / 3;
         cbline = bbline + height / 3;
-        yscl = (float) abline / Short.MAX_VALUE;
+        yscl = (float) abline / ((float) Short.MAX_VALUE * 1.05f);
     }
 
     @Override
@@ -71,6 +71,9 @@ public class Audio extends PApplet {
                 bbuff[i] = bmbb.getShort();
             }
 
+            ascl = (float) width / abuff.length;
+            bscl = (float) width * 100f / bbuff.length;
+
         } catch (IOException e) {
             e.printStackTrace();
             exit();
@@ -79,8 +82,19 @@ public class Audio extends PApplet {
 
     @Override
     public void draw() {
-
-
-
+        color(255,255,255);
+        line(0,abline,width,abline);
+        color(30,30,0);
+        float before = abline;
+        for(int i = 0; i < abuff.length; ++i){
+            line(ascl * (i - 1),before, ascl*i, abline - yscl * abuff[i]);
+            before = abline - yscl * abuff[i];
+        }
+        before = bbline;
+        for(int i = 0; i < bbuff.length; ++i){
+            line(bscl * (i - 1),before, bscl*i, bbline - yscl * bbuff[i]);
+            before = bbline - yscl * bbuff[i];
+        }
+        noLoop();
     }
 }
