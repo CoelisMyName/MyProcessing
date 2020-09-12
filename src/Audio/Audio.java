@@ -15,8 +15,8 @@ public class Audio extends PApplet {
         PApplet.runSketch(new String[]{"Audio"}, pt);
     }
 
-    public static final String apcm = "C:\\Users\\onthe\\Desktop\\物院app\\测试信号.pcm";
-    public static final String bpcm = "C:\\Users\\onthe\\Desktop\\物院app\\卷积逆信号.pcm";
+    public static final String apcm = "D:\\测试信号.pcm";
+    public static final String bpcm = "D:\\卷积逆信号.pcm";
 
     long aLong = 0;
     long bLong = 0;
@@ -64,15 +64,28 @@ public class Audio extends PApplet {
             bbuff = new short[(int) (bLong / 2)];
             cbuff = new short[abuff.length + bbuff.length - 1];
 
+            System.out.println("abuff" + " 大小为" + abuff.length);
+            System.out.println("bbuff" + " 大小为" + bbuff.length);
+            System.out.println("cbuff" + " 大小为" + cbuff.length);
+
+            cscl = (float) width / cbuff.length;
+
             for(int i = 0; i < aLong / 2; ++i){
-                abuff[i] = ambb.getShort();
+                int temp1 = 0x00ff & ambb.get();
+                int temp2 = (0x00ff & ambb.get()) << 8;
+                abuff[i] = (short) (temp1 | temp2);
             }
             for(int i = 0; i < bLong / 2; ++i){
-                bbuff[i] = bmbb.getShort();
+                int temp1 = 0x00ff & bmbb.get();
+                int temp2 = (0x00ff & bmbb.get()) << 8;
+                bbuff[i] = (short) (temp1 | temp2);
             }
 
+            ambb.clear();
+            bmbb.clear();
+
             ascl = (float) width / abuff.length;
-            bscl = (float) width * 100f / bbuff.length;
+            bscl = (float) width / bbuff.length;
 
         } catch (IOException e) {
             e.printStackTrace();
