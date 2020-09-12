@@ -47,7 +47,9 @@ public class Audio extends PApplet {
 
     @Override
     public void setup() {
+        colorMode(RGB);
         background(255);
+
         try {
             FileInputStream afis = new FileInputStream(apcm);
             aLong = afis.getChannel().size();
@@ -95,9 +97,10 @@ public class Audio extends PApplet {
 
     @Override
     public void draw() {
-        color(255,255,255);
+        stroke(255,0, 255);
         line(0,abline,width,abline);
-        color(30,30,0);
+
+
         float before = abline;
         for(int i = 0; i < abuff.length; ++i){
             line(ascl * (i - 1),before, ascl*i, abline - yscl * abuff[i]);
