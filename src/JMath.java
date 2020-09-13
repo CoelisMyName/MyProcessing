@@ -8,9 +8,10 @@ public class JMath {
         if(N == -1){
             throw new Exception("找2的幂超出了int最大值");
         }
-        float c[] = new float[length];
+        float[] c = new float[length];
 
-        Complex afreq[] = new Complex[N], bfreq[] = new Complex[N];
+        Complex[] afreq = new Complex[N];
+        Complex[] bfreq = new Complex[N];
         for (int i = 0; i < N; ++i){
             afreq[i] = new Complex();
             bfreq[i] = new Complex();
@@ -19,11 +20,15 @@ public class JMath {
         dft(a,afreq);
         dft(b,bfreq);
 
+        //fft(a,afreq);
+        //fft(b,bfreq);
+
         for(int i = 0; i < N; ++i){
             afreq[i].assign_mul(bfreq[i]);
         }
 
         idft(afreq, c);
+        //ifft(afreq, c);
         return c;
     }
 
@@ -33,7 +38,7 @@ public class JMath {
         if(N == -1){
             throw new Exception("找2的幂超出了int最大值");
         }
-        float c[] = new float[length];
+        float[] c = new float[length];
         for(int i = 0; i < c.length; ++i){
             for(int j = 0; j < a.length; ++j){
                 if(i - j < 0){
@@ -49,50 +54,18 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        Random random = new Random();
-        int lengtha = random.nextInt(0x10_00), lengthb = random.nextInt(0x10_00);
-        float[] a = new float[lengtha];
-        float[] b = new float[lengthb];
-        random.nextInt(0x10000);
-        for(int i = 0; i < a.length; ++i){
-            short temp = (short) random.nextInt(Short.MAX_VALUE);
-            if(random.nextBoolean()){
-                temp = (short) -temp;
-            }
-            a[i] = temp;
+        float[] a = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+        Complex[] c = new Complex[a.length];
+        for (int i = 0; i < c.length; ++i){
+            c[i] = new Complex();
         }
-
-        for(int i = 0; i < b.length; ++i){
-            short temp = (short) random.nextInt(Short.MAX_VALUE);
-            if(random.nextBoolean()){
-                temp = (short) -temp;
-            }
-            b[i] = temp;
-        }
-
-        float max;
-        float[] c;
-        c = native_convolution(a,b);
-        max = Short.MAX_VALUE / abs_max(c);
-        mul_k(c,max);
-        System.out.println("native_convolution(a,b)");
-        for(float v : c){
-            System.out.print(Math.ceil(v) + " ");
-        }
-        System.out.println();
-        System.out.println();
-
-        c = convolution(a,b);
-        max = Short.MAX_VALUE / abs_max(c);
-        mul_k(c,max);
-        System.out.println("convolution(a,b)");
-        for(float v : c){
-            System.out.print(Math.ceil(v) + " ");
+        System.out.println("DFT");
+        dft(a,c);
+        for( Complex v : c){
+            System.out.println(v.real + " + " + v.imagine);
         }
         System.out.println();
     }
-
-    private static final int POWER_MAX = 0b01000000_00000000_00000000_00000000;
 
     public static int power_ceil(int a){
         for(int i = 1; i != Integer.MIN_VALUE; i <<= 1){
@@ -135,8 +108,16 @@ public class JMath {
         System.out.println();
     }
 
-    public static void fft(float[] a, Complex[] fre){
+    public static void dft4(float[] a, int offset, int step, Complex[] fre){
+        final int N = 4;
+    }
 
+    public static void fft(float[] a, Complex[] fre){
+        final int N = fre.length, L = 4, M = a.length / L;
+        final double CONST = Math.PI * 2f / N;
+        for(int l = 0; l < L; ++l){
+
+        }
     }
 
 
@@ -145,7 +126,7 @@ public class JMath {
 
     }
 
-    public static float abs_max(float a[]){
+    public static float abs_max(float[] a){
         float max = 0;
         float temp;
         for(float v : a){
@@ -157,7 +138,7 @@ public class JMath {
         return max;
     }
 
-    public static void mul_k(float a[], float m){
+    public static void mul_k(float[] a, float m){
         for (int i = 0; i < a.length; i++) {
             a[i] *= m;
         }

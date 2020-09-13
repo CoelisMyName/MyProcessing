@@ -27,4 +27,8 @@ public class Complex {
         real = real + c.real;
         imagine = imagine + c.imagine;
     }
+
+    public float length(){
+        return (float) Math.sqrt(real * real + imagine * imagine);
+    }
 }
