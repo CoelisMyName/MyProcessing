@@ -54,7 +54,7 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        final int ll = 64;
+        final int ll = 4;
         float[] a = new float[ll];
         float[] b = new float[ll];
         float[] c = new float[ll];
