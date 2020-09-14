@@ -1,44 +1,37 @@
 package Audio;
 
-import FlowField.FlowField;
 import processing.core.PApplet;
 
-import javax.swing.*;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 
 public class Audio extends PApplet {
-    public static void main (String... args) {
+    public static final String apcm = "D:\\测试信号.pcm";
+    public static final String bpcm = "D:\\卷积逆信号.pcm";
+    long aLong = 0;
+    long bLong = 0;
+    MappedByteBuffer ambb = null;
+    MappedByteBuffer bmbb = null;
+    ShortBuffer asbf;
+    ShortBuffer bsbf;
+    short[] abuff = null;
+    short[] bbuff = null;
+    short[] cbuff = null;
+    int abline, bbline, cbline;
+    float yscl;
+    float ascl, bscl, cscl;
+
+    public static void main(String... args) {
         Audio pt = new Audio();
         PApplet.runSketch(new String[]{"Audio"}, pt);
     }
 
-    public static final String apcm = "D:\\测试信号.pcm";
-    public static final String bpcm = "D:\\卷积逆信号.pcm";
-
-    long aLong = 0;
-    long bLong = 0;
-
-    MappedByteBuffer ambb = null;
-    MappedByteBuffer bmbb = null;
-
-    ShortBuffer asbf;
-    ShortBuffer bsbf;
-
-    short[] abuff = null;
-    short[] bbuff = null;
-    short[] cbuff = null;
-
-    int abline, bbline, cbline;
-
-    float yscl;
-    float ascl, bscl, cscl;
-
     @Override
     public void settings() {
-        size(1600,900,P2D);
+        size(1600, 900, P2D);
         abline = (height / 3) / 2;
         bbline = abline + height / 3;
         cbline = bbline + height / 3;
@@ -53,11 +46,11 @@ public class Audio extends PApplet {
         try {
             FileInputStream afis = new FileInputStream(apcm);
             aLong = afis.getChannel().size();
-            ambb = afis.getChannel().map(FileChannel.MapMode.READ_ONLY,0,aLong);
+            ambb = afis.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, aLong);
 
             FileInputStream bfis = new FileInputStream(bpcm);
             bLong = bfis.getChannel().size();
-            bmbb = bfis.getChannel().map(FileChannel.MapMode.READ_ONLY,0,bLong);
+            bmbb = bfis.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, bLong);
 
             System.out.println(apcm + " 大小为" + aLong);
             System.out.println(bpcm + " 大小为" + bLong);
@@ -72,12 +65,12 @@ public class Audio extends PApplet {
 
             cscl = (float) width / cbuff.length;
 
-            for(int i = 0; i < aLong / 2; ++i){
+            for (int i = 0; i < aLong / 2; ++i) {
                 int temp1 = 0x00ff & ambb.get();
                 int temp2 = (0x00ff & ambb.get()) << 8;
                 abuff[i] = (short) (temp1 | temp2);
             }
-            for(int i = 0; i < bLong / 2; ++i){
+            for (int i = 0; i < bLong / 2; ++i) {
                 int temp1 = 0x00ff & bmbb.get();
                 int temp2 = (0x00ff & bmbb.get()) << 8;
                 bbuff[i] = (short) (temp1 | temp2);
@@ -97,18 +90,18 @@ public class Audio extends PApplet {
 
     @Override
     public void draw() {
-        stroke(255,0, 255);
-        line(0,abline,width,abline);
+        stroke(255, 0, 255);
+        line(0, abline, width, abline);
 
 
         float before = abline;
-        for(int i = 0; i < abuff.length; ++i){
-            line(ascl * (i - 1),before, ascl*i, abline - yscl * abuff[i]);
+        for (int i = 0; i < abuff.length; ++i) {
+            line(ascl * (i - 1), before, ascl * i, abline - yscl * abuff[i]);
             before = abline - yscl * abuff[i];
         }
         before = bbline;
-        for(int i = 0; i < bbuff.length; ++i){
-            line(bscl * (i - 1),before, bscl*i, bbline - yscl * bbuff[i]);
+        for (int i = 0; i < bbuff.length; ++i) {
+            line(bscl * (i - 1), before, bscl * i, bbline - yscl * bbuff[i]);
             before = bbline - yscl * bbuff[i];
         }
         noLoop();

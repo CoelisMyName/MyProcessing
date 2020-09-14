@@ -1,36 +1,30 @@
 import processing.core.PApplet;
 import processing.core.PVector;
 
-public class GravityField  extends PApplet {
+public class GravityField extends PApplet {
 
-    public static void main (String... args) {
+    int scl = 1;
+    float decline = (float) 0.9999;
+    float maxSpeed = 10;
+    float mass;
+    float minRadius = 2;
+    int rows, cols;
+    PVector[] gravityfield;
+    Particle[] particles = new Particle[10000];
+
+    public static void main(String... args) {
         GravityField pt = new GravityField();
         PApplet.runSketch(new String[]{"GravityField"}, pt);
     }
-
-    int scl = 1;
-
-    float decline = (float) 0.9999;
-
-    float maxSpeed = 10;
-
-    float mass;
-
-    float minRadius = 2;
-
-    int rows, cols;
-
-    PVector[] gravityfield;
-    Particle[] particles = new Particle[10000];
 
     @Override
     public void settings() {
         size(1000, 1000, P2D);
 
-        cols = ceil((float) width/scl);
-        rows = ceil((float) height/scl);
+        cols = ceil((float) width / scl);
+        rows = ceil((float) height / scl);
 
-        gravityfield = new PVector[rows*cols];
+        gravityfield = new PVector[rows * cols];
 
         createField();
         createParticles();
@@ -43,8 +37,8 @@ public class GravityField  extends PApplet {
     }
 
     private void createField() {
-        for(int y = 0; y < rows; ++y){
-            for(int x = 0; x < cols; ++x){
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
 
             }
         }
@@ -71,7 +65,7 @@ public class GravityField  extends PApplet {
         private int col;
 
         public Particle() {
-            pos = new PVector(random(width-1), random(height-1));
+            pos = new PVector(random(width - 1), random(height - 1));
             vel = new PVector(0, 0);
             acc = new PVector(0, 0);
 
@@ -81,11 +75,11 @@ public class GravityField  extends PApplet {
         }
 
         public void follow(PVector[] vectors) {
-            int x = floor(pos.x/scl);
-            int y = floor(pos.y/scl);
+            int x = floor(pos.x / scl);
+            int y = floor(pos.y / scl);
 
             int index = x + y * cols;
-            if(index >= vectors.length){
+            if (index >= vectors.length) {
                 index %= vectors.length;
             }
 
@@ -121,23 +115,23 @@ public class GravityField  extends PApplet {
         }
 
         public void edges() {
-            if (pos.x > width-1) {
+            if (pos.x > width - 1) {
                 pos.x = 1;
                 updateOldPos();
             }
 
             if (pos.x < 1) {
-                pos.x = width-1;
+                pos.x = width - 1;
                 updateOldPos();
             }
 
-            if (pos.y > height-1) {
+            if (pos.y > height - 1) {
                 pos.y = 1;
                 updateOldPos();
             }
 
             if (pos.y < 1) {
-                pos.y = height-1;
+                pos.y = height - 1;
                 updateOldPos();
             }
         }
