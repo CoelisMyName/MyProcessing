@@ -1,3 +1,4 @@
+import javax.xml.stream.events.Comment;
 import java.util.Random;
 
 public class JMath {
@@ -53,48 +54,44 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        float[] a = new float[4096];
+        final int ll = 64;
+        float[] a = new float[ll];
+        float[] b = new float[ll];
+        float[] c = new float[ll];
         Random random = new Random();
         for (int i = 0; i < a.length; i++) {
             if (random.nextBoolean()) {
-                a[i] = -random.nextInt(1000);
+                a[i] = -random.nextInt(20);
             } else {
-                a[i] = random.nextInt(1000);
+                a[i] = random.nextInt(20);
             }
         }
-        Complex[] c = new Complex[a.length];
-        Complex[] c1 = new Complex[a.length];
-        for (int i = 0; i < c.length; ++i) {
-            c[i] = new Complex();
-            c1[i] = new Complex();
+        Complex[] f = new Complex[a.length];
+        for (int i = 0; i < f.length; ++i) {
+            f[i] = new Complex();
         }
 
-        System.out.println("FFT");
-        fft(a, c1);
-        for (Complex v : c1) {
-            System.out.println(v.real + " + " + v.imagine);
+        fft(a, f);
+        System.out.println("ORIGIN");
+        for (float v : a){
+            System.out.print(v + " ");
         }
         System.out.println();
 
-        System.out.println("DFT");
-        dft(a, c);
-        for (Complex v : c) {
-            System.out.println(v.real + " + " + v.imagine);
+        System.out.println("IFFT");
+        ifft(f,c);
+        for (float v : c){
+            System.out.print(v + " ");
         }
         System.out.println();
 
-        for (int i = 0; i < c.length; i++) {
-            double temp1 = Math.abs((c[i].real - c1[i].real) / c[i].real);
-            if (temp1 > 0.001) {
-                System.out.println("> 0.001 " + i + " " + temp1);
-                System.out.println(c[i].real + " " + c1[i].real);
-            }
-            temp1 = Math.abs((c[i].imagine - c1[i].imagine) / c[i].imagine);
-            if (temp1 > 0.001) {
-                System.out.println("> 0.001 " + i + " " + temp1);
-                System.out.println(c[i].imagine + " " + c1[i].imagine);
-            }
+        System.out.println("IDFT");
+        idft(f,b);
+        for (float v : b){
+            System.out.print(v + " ");
         }
+        System.out.println();
+
     }
 
     public static int power_ceil(int a) {
@@ -135,7 +132,6 @@ public class JMath {
             }
             a[i] = result / fre.length;
         }
-        System.out.println();
     }
 
     public static void dft4(float[] a, int aoffset, int astep, final int N, Complex[] fre, int foffset) {
@@ -240,9 +236,112 @@ public class JMath {
         }
     }
 
-
+    /**
+     *
+     * @param fre 频域
+     * @param a 时域
+     *          将会改变fre里的数据
+     */
     public static void ifft(Complex[] fre, float[] a) {
+        final int N = fre.length, L = 4;
+        Complex[] result = new Complex[fre.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = new Complex();
+        }
+        ifft(fre, 0, 1, N, result, 0);
+        for (int i = 0; i < a.length; i++) {
+            a[i] = result[i].real / N;
+        }
+    }
 
+    public static void ifft(Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
+        final int L = 4, M = N / L;
+        final double CONST = Math.PI * 2f / N;
+
+        if (N == 4) {
+            idft4(fre, foffset, fstep, N, result, roffset);
+            return;
+        }
+        for (int i = 0; i < L; i++) {
+            ifft(fre, foffset + i * fstep, fstep * L, M, result, roffset + i * M);
+        }
+
+        //系数与F(0,q)相乘
+        Complex temp0 = new Complex();
+        double rad;
+        for (int l = 1; l < L; ++l) {
+            for (int q = 1; q < M; ++q) {
+                //W(l * q, N)
+                rad = CONST * q * l;
+                temp0.real = (float) Math.cos(rad);
+                temp0.imagine = (float) Math.sin(rad);
+                result[foffset + l * M + q].assign_mul(temp0);
+            }
+        }
+
+        Complex temp1 = new Complex(), temp2 = new Complex(), temp3 = new Complex();
+        int i0 = roffset, i1 = roffset + M, i2 = roffset + M + M, i3 = roffset + M + M + M;
+        for (int q = 0; q < M; ++q) {
+
+            temp0.real = result[i0].real + result[i2].real;
+            temp0.imagine = result[i0].imagine + result[i2].imagine;
+
+            temp1.real = result[i0].real - result[i2].real;
+            temp1.imagine = result[i0].imagine - result[i2].imagine;
+
+            temp2.real = result[i1].real + result[i3].real;
+            temp2.imagine = result[i1].imagine + result[i3].imagine;
+
+            temp3.real = result[i1].real - result[i3].real;
+            temp3.imagine = result[i1].imagine - result[i3].imagine;
+
+            result[i0].real = temp0.real + temp2.real;
+            result[i0].imagine = temp0.imagine + temp2.imagine;
+
+            result[i1].real = temp1.real - temp3.imagine;
+            result[i1].imagine = temp1.imagine + temp3.real;
+
+            result[i2].real = temp0.real - temp2.real;
+            result[i2].imagine = temp0.imagine - temp2.imagine;
+
+            result[i3].real = temp1.real + temp3.imagine;
+            result[i3].imagine = temp1.imagine - temp3.real;
+
+            ++i0;
+            ++i1;
+            ++i2;
+            ++i3;
+        }
+    }
+
+    public static void idft4(Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
+        final int L = 4;
+        final double CONST = Math.PI * 2f / N;
+        double temp;
+        int i0 = foffset, i1 = i0 + fstep, i2 = i1 + fstep, i3 = i2 + fstep;
+        Complex buff = new Complex();
+        for (int i = 0; i < L; ++i) {
+
+            result[roffset + i].assign_add(fre[i0]);
+
+                temp = CONST * i * 1;
+            buff.real = (float) Math.cos(temp);
+            buff.imagine = (float) Math.sin(temp);
+            buff.assign_mul(fre[i1]);
+            result[roffset + i].assign_add(buff);
+
+                temp = CONST * i * 2;
+            buff.real = (float) Math.cos(temp);
+            buff.imagine = (float) Math.sin(temp);
+            buff.assign_mul(fre[i2]);
+            result[roffset + i].assign_add(buff);
+
+                temp = CONST * i * 3;
+            buff.real = (float) Math.cos(temp);
+            buff.imagine = (float) Math.sin(temp);
+            buff.assign_mul(fre[i3]);
+            result[roffset + i].assign_add(buff);
+        }
     }
 
     public static float abs_max(float[] a) {
