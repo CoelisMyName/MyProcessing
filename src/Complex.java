@@ -28,6 +28,11 @@ public class Complex {
         imagine = imagine + c.imagine;
     }
 
+    public void assign(final Complex c){
+        real = c.real;
+        imagine = c.imagine;
+    }
+
     public float length(){
         return (float) Math.sqrt(real * real + imagine * imagine);
     }

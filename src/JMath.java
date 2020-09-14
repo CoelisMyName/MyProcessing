@@ -54,17 +54,47 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        float[] a = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+        float[] a = new float[67108864];
+        Random random = new Random();
+        for (int i = 0; i < a.length; i++) {
+            if(random.nextBoolean()){
+                a[i] = -random.nextInt(1000);
+            }
+            else {
+                a[i] = random.nextInt(1000);
+            }
+        }
         Complex[] c = new Complex[a.length];
+        Complex[] c1 = new Complex[a.length];
         for (int i = 0; i < c.length; ++i){
             c[i] = new Complex();
+            c1[i] = new Complex();
         }
+
+        System.out.println("FFT");
+        fft(a,c1);
+        for( Complex v : c1){
+            System.out.println(v.real + " + " + v.imagine);
+        }
+        System.out.println();
+
         System.out.println("DFT");
         dft(a,c);
         for( Complex v : c){
             System.out.println(v.real + " + " + v.imagine);
         }
         System.out.println();
+
+        for (int i = 0; i < c.length; i++) {
+            double temp1 = Math.abs(c[i].real - c1[i].real) / c[i].real;
+            if(temp1 > 0.001){
+                System.out.println("> 0.001 " + i + " " + temp1);
+            }
+            temp1 = Math.abs(c[i].imagine - c1[i].imagine) / c[i].imagine;
+            if(temp1 > 0.001){
+                System.out.println("> 0.001 " + i + " " + temp1);
+            }
+        }
     }
 
     public static int power_ceil(int a){
@@ -108,17 +138,184 @@ public class JMath {
         System.out.println();
     }
 
-    public static void dft4(float[] a, int offset, int step, Complex[] fre){
-        final int N = 4;
-    }
+    public static void dft4(float[] a, int aoffset, int astep, final int N, Complex[] fre, int foffset){
+        final int L = 4;
+        final double CONST = -Math.PI * 2f / N;
+        double temp;
+        int i0 = aoffset, i1 = i0 + astep, i2 = i1 + astep, i3 = i2 + astep;
+        for (int i = 0; i < L; ++i){
 
-    public static void fft(float[] a, Complex[] fre){
-        final int N = fre.length, L = 4, M = a.length / L;
-        final double CONST = Math.PI * 2f / N;
-        for(int l = 0; l < L; ++l){
+            if(i0 < a.length){
+                fre[foffset + i].real += a[i0];
+            }
 
+            if(i1 < a.length){
+                temp = CONST * i * 1;
+                fre[foffset + i].real += (float) (a[i1] * Math.cos(temp));
+                fre[foffset + i].imagine += (float) (a[i1] * Math.sin(temp));
+            }
+
+            if(i2 < a.length){
+                temp = CONST * i * 2;
+                fre[foffset + i].real += (float) (a[i2] * Math.cos(temp));
+                fre[foffset + i].imagine += (float) (a[i2] * Math.sin(temp));
+            }
+
+
+            if(i3 < a.length){
+                temp = CONST * i * 3;
+                fre[foffset + i].real += (float) (a[i3] * Math.cos(temp));
+                fre[foffset + i].imagine += (float) (a[i3] * Math.sin(temp));
+            }
         }
     }
+
+    /**
+     *
+     * @param a 输入信号
+     * @param fre 长度必须为4的幂
+     */
+    public static void fft(final float[] a, Complex[] fre){
+        final int N = fre.length, L = 4, M = fre.length / L;
+        final double CONST = -Math.PI * 2f / N;
+
+        fft(a, 0, 1, N, fre, 0);
+        /*
+        for (int i = 0; i < L; i++) {
+            fft(a, i, L, M, fre, i * M);
+        }
+
+        //系数与F(0,q)相乘
+        Complex temp0 = new Complex();
+        double rad;
+        for(int l = 1; l < L; ++l){
+            for(int q = 1; q < M; ++q){
+                //W(l * q, N)
+                rad = CONST * q * l;
+                temp0.real = (float) Math.cos(rad);
+                temp0.imagine = (float) Math.sin(rad);
+                fre[l * M + q].assign_mul(temp0);
+            }
+        }
+
+        //线性相加1
+        Complex temp1 = new Complex(), temp2 = new Complex(), temp3 = new Complex();
+        int i0 = 0, i1 = M, i2 = M + M, i3 = M + M + M;
+        for(int q = 0; q < M; ++q){
+            temp0.assign(fre[i0]);
+            temp1.assign(fre[i1]);
+            temp2.assign(fre[i2]);
+            temp3.assign(fre[i3]);
+
+            fre[i0].real = temp0.real + temp2.real;
+            fre[i0].imagine = temp0.imagine + temp2.imagine;
+
+            fre[i1].real = temp0.real - temp2.real;
+            fre[i1].imagine = temp0.imagine - temp2.imagine;
+
+            fre[i2].real = temp1.real + temp3.real;
+            fre[i2].imagine = temp1.imagine + temp3.imagine;
+
+            fre[i3].real = temp1.real - temp3.real;
+            fre[i3].imagine = temp1.imagine - temp3.imagine;
+
+            temp0.assign(fre[i0]);
+            temp1.assign(fre[i1]);
+            temp2.assign(fre[i2]);
+            temp3.assign(fre[i3]);
+
+            fre[i0].real = temp0.real + temp2.real;
+            fre[i0].imagine = temp0.imagine + temp2.imagine;
+
+            fre[i1].real = temp1.real + temp3.imagine;
+            fre[i1].imagine = temp1.imagine - temp3.real;
+
+            fre[i2].real = temp0.real - temp2.real;
+            fre[i2].imagine = temp0.imagine - temp2.imagine;
+
+            fre[i3].real = temp1.real - temp3.imagine;
+            fre[i3].imagine = temp1.imagine + temp3.real;
+
+            ++i0;
+            ++i1;
+            ++i2;
+            ++i3;
+        }
+*/
+    }
+
+    public static void fft(final float[] a, int aoffset, int astep, int N, Complex[] fre, int foffset){
+        final int L = 4, M = N / L;
+        final double CONST = -Math.PI * 2f / N;
+
+        if(N == 4){
+            dft4(a,aoffset,astep,N,fre,foffset);
+            return;
+        }
+        else {
+            for (int i = 0; i < L; i++) {
+                fft(a, aoffset + i * astep, astep * L, M, fre, foffset + i * M);
+            }
+
+            //系数与F(0,q)相乘
+            Complex temp0 = new Complex();
+            double rad;
+            for(int l = 1; l < L; ++l){
+                for(int q = 1; q < M; ++q){
+                    //W(l * q, N)
+                    rad = CONST * q * l;
+                    temp0.real = (float) Math.cos(rad);
+                    temp0.imagine = (float) Math.sin(rad);
+                    fre[foffset + l * M + q].assign_mul(temp0);
+                }
+            }
+
+            //线性相加1
+            Complex temp1 = new Complex(), temp2 = new Complex(), temp3 = new Complex();
+            int i0 = foffset, i1 = foffset + M, i2 = foffset + M + M, i3 = foffset + M + M + M;
+            for(int q = 0; q < M; ++q){
+                temp0.assign(fre[i0]);
+                temp1.assign(fre[i1]);
+                temp2.assign(fre[i2]);
+                temp3.assign(fre[i3]);
+
+                fre[i0].real = temp0.real + temp2.real;
+                fre[i0].imagine = temp0.imagine + temp2.imagine;
+
+                fre[i1].real = temp0.real - temp2.real;
+                fre[i1].imagine = temp0.imagine - temp2.imagine;
+
+                fre[i2].real = temp1.real + temp3.real;
+                fre[i2].imagine = temp1.imagine + temp3.imagine;
+
+                fre[i3].real = temp1.real - temp3.real;
+                fre[i3].imagine = temp1.imagine - temp3.imagine;
+
+                temp0.assign(fre[i0]);
+                temp1.assign(fre[i1]);
+                temp2.assign(fre[i2]);
+                temp3.assign(fre[i3]);
+
+                fre[i0].real = temp0.real + temp2.real;
+                fre[i0].imagine = temp0.imagine + temp2.imagine;
+
+                fre[i1].real = temp1.real + temp3.imagine;
+                fre[i1].imagine = temp1.imagine - temp3.real;
+
+                fre[i2].real = temp0.real - temp2.real;
+                fre[i2].imagine = temp0.imagine - temp2.imagine;
+
+                fre[i3].real = temp1.real - temp3.imagine;
+                fre[i3].imagine = temp1.imagine + temp3.real;
+
+                ++i0;
+                ++i1;
+                ++i2;
+                ++i3;
+            }
+        }
+    }
+
 
 
 
