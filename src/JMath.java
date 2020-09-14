@@ -54,16 +54,16 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        final int ll = 4;
+        final int ll = 16;
         float[] a = new float[ll];
         float[] b = new float[ll];
         float[] c = new float[ll];
         Random random = new Random();
         for (int i = 0; i < a.length; i++) {
             if (random.nextBoolean()) {
-                a[i] = -random.nextInt(20);
+                a[i] = -random.nextInt(100);
             } else {
-                a[i] = random.nextInt(20);
+                a[i] = random.nextInt(100);
             }
         }
         Complex[] f = new Complex[a.length];
@@ -242,7 +242,7 @@ public class JMath {
      * @param a 时域
      *          将会改变fre里的数据
      */
-    public static void ifft(Complex[] fre, float[] a) {
+    public static void ifft(final Complex[] fre, float[] a) {
         final int N = fre.length, L = 4;
         Complex[] result = new Complex[fre.length];
         for (int i = 0; i < result.length; i++) {
@@ -254,7 +254,7 @@ public class JMath {
         }
     }
 
-    public static void ifft(Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
+    public static void ifft(final Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
         final int L = 4, M = N / L;
         final double CONST = Math.PI * 2f / N;
 
@@ -314,7 +314,7 @@ public class JMath {
         }
     }
 
-    public static void idft4(Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
+    public static void idft4(final Complex[] fre, int foffset, int fstep, int N, Complex[] result, int roffset) {
         final int L = 4;
         final double CONST = Math.PI * 2f / N;
         double temp;
