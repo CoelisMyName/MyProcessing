@@ -5,9 +5,24 @@ import java.util.zip.ZipOutputStream;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("D:\\Stellaris (Steam) Trainer Setup.exe");
-        ZipCompressor zipCompressor = new ZipCompressor(file, new FileOutputStream("D:\\1.zip"));
-        zipCompressor.zip();
+        byte[] head = new byte[2];
+        byte[] data = new byte[10];
+        head[0] = 'y'; head[1] = 'y';
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) ('A' + i);
+        }
+        File file = new File("a.txt");
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(head);
+        fos.write(data);
+        fos.close();
+
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        raf.seek(1);
+        raf.write('z');
+        raf.seek(0);
+        raf.write('x');
+        raf.close();
     }
 
     public static class ZipCompressor {

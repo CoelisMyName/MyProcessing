@@ -54,44 +54,15 @@ public class JMath {
     }
 
     public static void main(String[] args) throws Exception {
-        final int ll = 16;
-        float[] a = new float[ll];
-        float[] b = new float[ll];
-        float[] c = new float[ll];
-        Random random = new Random();
-        for (int i = 0; i < a.length; i++) {
-            if (random.nextBoolean()) {
-                a[i] = -random.nextInt(100);
-            } else {
-                a[i] = random.nextInt(100);
-            }
+        float[] a = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+        Complex[] c = new Complex[a.length];
+        for (int i = 0; i < c.length; i++) {
+            c[i] = new Complex();
         }
-        Complex[] f = new Complex[a.length];
-        for (int i = 0; i < f.length; ++i) {
-            f[i] = new Complex();
+        fft(a,c);
+        for (Complex v : c){
+            System.out.println(v.real + " " + v.imagine);
         }
-
-        fft(a, f);
-        System.out.println("ORIGIN");
-        for (float v : a){
-            System.out.print(v + " ");
-        }
-        System.out.println();
-
-        System.out.println("IFFT");
-        ifft(f,c);
-        for (float v : c){
-            System.out.print(v + " ");
-        }
-        System.out.println();
-
-        System.out.println("IDFT");
-        idft(f,b);
-        for (float v : b){
-            System.out.print(v + " ");
-        }
-        System.out.println();
-
     }
 
     public static int power_ceil(int a) {
